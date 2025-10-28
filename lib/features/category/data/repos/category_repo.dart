@@ -112,20 +112,20 @@ class CategoryRepo {
     }
   }
 
-  Future<Either<ApiErrorModel, List<ProductModel>>> fetchProductCategoryData(int category, int prePageNum) async {
-    List<ProductModel> categories = [];
-    try {
-      log("➡️ [CategoryRepo] Fetching products for category: $category page: $prePageNum");
-      Response response = await dio.get(ApiConstants.products);
-      log("✅ [CategoryRepo] Response: ${response.data}");
+ Future<Either<ApiErrorModel, List<Data>>> fetchProductCategoryData(
+  int category,
+  int page,
+) async {
+  try {
+    final res = await dio.get(
+      ApiConstants.products,
+      queryParameters: {'category': category, 'page': page},
+    );
 
-      for (var element in response.data) {
-        categories.add(ProductModel.fromJson(element));
-      }
-      return Right(categories);
-    } catch (e) {
-      log("❌ [CategoryRepo] fetchProductCategoryData error: $e");
-      return Left(ApiErrorHandler.handle(e));
-    }
+    final parsed = ProductModel.fromJson(res.data);
+    return Right(parsed.data ?? <Data>[]);
+  } catch (e) {
+    return Left(ApiErrorHandler.handle(e));
   }
+}
 }

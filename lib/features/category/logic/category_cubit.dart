@@ -18,6 +18,7 @@ class CategoryCubit extends Cubit<CategoryState> {
     scrollController.addListener(_onScroll);
   }
   CategoryRepo categoryRepo;
+  List<Data> productList = [];
 
   static CategoryCubit get(context) => BlocProvider.of(context);
 
@@ -32,8 +33,14 @@ class CategoryCubit extends Cubit<CategoryState> {
   bool isClicked = false;
   List<ProductModel> productSubSubCategoriesList = [];
   Map<String, List<ParentCategoryModel>> categoriesMap = {};
+  final Map<int, List<Data>> categoryProductsMap =
+      {}; // categoryId -> List<Data>
+
+  final Map<int, Map<String, List<String>>> categoryOptionsMap =
+      {}; // categoryId -> {optionName: [values...]}
+
   List<CategoryData> allCategories = [];
- List<CategoryData> get topLevelCategories {
+  List<CategoryData> get topLevelCategories {
     return allCategories.where((category) => category.isTopLevel).toList();
   }
 
@@ -42,20 +49,21 @@ class CategoryCubit extends Cubit<CategoryState> {
     // Return top-level categories for the filter list
     return topLevelCategories;
   }
+
   List<FilterCategorieModel> categories = [
     FilterCategorieModel(data: [
       CategoryData(
-          id: 1,
-          name: 'Dress',
-         ),
-     CategoryData(
-          id: 1,
-          name: 'Dress',
-         ),
+        id: 1,
+        name: 'Dress',
+      ),
       CategoryData(
-          id: 1,
-          name: 'Dress',
-         ),
+        id: 1,
+        name: 'Dress',
+      ),
+      CategoryData(
+        id: 1,
+        name: 'Dress',
+      ),
     ]),
   ];
 
@@ -72,10 +80,12 @@ class CategoryCubit extends Cubit<CategoryState> {
     'T-shirts',
     'Pants',
   ];
+  String currentParentSlug = "";
 
-  void changeCurrentIndex(int index, int id) {
+  void changeCurrentIndex(int index, int id, String slug) {
     currentId = id;
     currentPageIndex = index;
+    currentParentSlug = slug;
     emit(ChangePageBody());
   }
 
@@ -102,10 +112,11 @@ class CategoryCubit extends Cubit<CategoryState> {
     emit(SubCategorySelected()); // Emit new state with selected category
   }
 
- Future<void> fetchCategories({bool getOnlyFormNetwork = false}) async {
+  Future<void> fetchCategories({bool getOnlyFormNetwork = false}) async {
     try {
       // Try to get from cache first
-      final cachedData = CachedApp.getCachedData(CachedDataType.categories.name);
+      final cachedData =
+          CachedApp.getCachedData(CachedDataType.categories.name);
       if (cachedData is FilterCategorieModel) {
         allCategories = cachedData.data ?? [];
         emit(CategorySuccess());
@@ -116,11 +127,11 @@ class CategoryCubit extends Cubit<CategoryState> {
     }
 
     emit(CategoryLoading());
-    
+
     final connectivityResult = await Connectivity().checkConnectivity();
     if (!connectivityResult.contains(ConnectivityResult.none)) {
       final response = await categoryRepo.fetchCategoriesData();
-      
+
       await response.fold((error) {
         allCategories = [];
         emit(CategoryFailure(error));
@@ -128,7 +139,7 @@ class CategoryCubit extends Cubit<CategoryState> {
         // Store the complete categories data
         allCategories = categoriesData.data ?? [];
         emit(CategorySuccess());
-        
+
         // Save to cache
         CachedApp.saveData(categoriesData, CachedDataType.categories.name);
       });
@@ -161,43 +172,32 @@ class CategoryCubit extends Cubit<CategoryState> {
       orElse: () => CategoryData(),
     );
   }
+
   Future<void> fetchChildCategories(String slug,
-    {bool getOnlyFormNetwork = false}) async {
-  try {
-    categoriesMap[slug] =
-        CachedApp.getCachedData("${CachedDataType.categories.name}_$slug");
-    emit(ChildCategorySuccess());
-  } catch (e) {
-    emit(ChildCategoryLoading());
-    final List<ConnectivityResult> connectivityResult =
-        await (Connectivity().checkConnectivity());
-    if (!connectivityResult.contains(ConnectivityResult.none)) {
-      final response = await categoryRepo.fetchChildCategoryData(slug);
-      response.fold((error) {
-        categories = [];
-        emit(ChildCategoryFailure(error));
-      }, (categoriesData) {
-        categoriesMap[slug];
-        CachedApp.saveData(
-            categoriesData, "${CachedDataType.categories.name}_$slug");
-        emit(ChildCategorySuccess());
-      });
-    } else {
-      categories = [];
-      Fluttertoast.showToast(
-        msg: "No internet Connection",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: ColorsManager.kPrimaryColor,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-      emit(ChildCategoryFailure(
-          ApiErrorModel(message: 'No internet connection')));
+      {bool getOnlyFormNetwork = false}) async {
+    try {
+      categoriesMap[slug] =
+          CachedApp.getCachedData("${CachedDataType.categories.name}_$slug");
+      emit(ChildCategorySuccess());
+    } catch (_) {
+      emit(ChildCategoryLoading());
+      final connectivity = await Connectivity().checkConnectivity();
+      if (!connectivity.contains(ConnectivityResult.none)) {
+        final res = await categoryRepo.fetchChildCategoryData(slug);
+        res.fold((err) {
+          emit(ChildCategoryFailure(err));
+        }, (list) {
+          // ✅ actually assign:
+          categoriesMap[slug] = list;
+          CachedApp.saveData(list, "${CachedDataType.categories.name}_$slug");
+          emit(ChildCategorySuccess());
+        });
+      } else {
+        emit(ChildCategoryFailure(
+            ApiErrorModel(message: 'No internet connection')));
+      }
     }
   }
-}
-
 
   Future<void> fetchChildSubCategories(int id, int index,
       {bool getOnlyFormNetwork = false}) async {
@@ -230,45 +230,61 @@ class CategoryCubit extends Cubit<CategoryState> {
     }
   }
 
-  Future<void> fetchProductSubSubCategories(int id,
-      {bool getOnlyFormNetwork = false}) async {
-    final List<ConnectivityResult> connectivityResult =
-        await (Connectivity().checkConnectivity());
-    if (!connectivityResult.contains(ConnectivityResult.none)) {
-      try {
-        if (getOnlyFormNetwork) {
-          throw "Data not found in cache";
-        }
-        productSubSubCategoriesList = CachedApp.getCachedData(
-            "${CachedDataType.productsCategory.name}_$id");
+ Future<void> fetchProductSubSubCategories(int categoryId, {bool getOnlyFormNetwork=false}) async {
+  final connectivity = await Connectivity().checkConnectivity();
+  if (!connectivity.contains(ConnectivityResult.none)) {
+    try {
+      if (getOnlyFormNetwork) throw 'forceNetwork';
+
+      // try cache
+      final cached = CachedApp.getCachedData("${CachedDataType.productsCategory.name}_$categoryId");
+      if (cached is List<Data> && cached.isNotEmpty) {
+        productList = cached;
+        categoryProductsMap[categoryId] = cached;          // ✅ store per leaf
+        _extractOptionsFromProducts(categoryId);            // ✅ build options map
         emit(FetchProductSubSubCategoriesSuccess());
-      } catch (e) {
-        emit(FetchProductSubSubCategoriesLoading());
-        final response =
-            await categoryRepo.fetchProductCategoryData(id, prePageNum);
-        response.fold((error) {
-          productSubSubCategoriesList = [];
-          emit(FetchProductSubSubCategoriesFailure(error));
-        }, (productSubSubCategoriesData) {
-          productSubSubCategoriesList = productSubSubCategoriesData;
-          CachedApp.saveData(productSubSubCategoriesData,
-              "${CachedDataType.productsCategory.name}_$id");
-          emit(FetchProductSubSubCategoriesSuccess());
-        });
+        return;
       }
-    } else {
-      productSubSubCategoriesList = [];
-      Fluttertoast.showToast(
-        msg: "No internet Connection",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: ColorsManager.kPrimaryColor,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-      emit(FetchProductSubSubCategoriesFailure(
-          ApiErrorModel(message: 'No internet connection')));
+    } catch (_) { /* fallthrough to network */ }
+
+    emit(FetchProductSubSubCategoriesLoading());
+    final res = await categoryRepo.fetchProductCategoryData(categoryId, prePageNum);
+    res.fold((err) {
+      productList = [];
+      emit(FetchProductSubSubCategoriesFailure(err));
+    }, (list) {
+      productList = list;
+      categoryProductsMap[categoryId] = list;              // ✅ store per leaf
+      _extractOptionsFromProducts(categoryId);              // ✅ build options map
+      CachedApp.saveData(list, "${CachedDataType.productsCategory.name}_$categoryId");
+      emit(FetchProductSubSubCategoriesSuccess());
+    });
+  } else {
+    productList = [];
+    Fluttertoast.showToast(msg: "No internet Connection", backgroundColor: ColorsManager.kPrimaryColor);
+    emit(FetchProductSubSubCategoriesFailure(ApiErrorModel(message: 'No internet connection')));
+  }
+}
+
+  void _extractOptionsFromProducts(int categoryId) {
+    final products = categoryProductsMap[categoryId] ?? [];
+    final Map<String, Set<String>> aggregated = {};
+
+    for (final p in products) {
+      for (final opt in (p.options ?? [])) {
+        final name = opt.name ?? "";
+        if (name.isEmpty) continue;
+        aggregated.putIfAbsent(name, () => {});
+        for (final v in (opt.values ?? [])) {
+          if (v.value != null && v.value!.isNotEmpty) {
+            aggregated[name]!.add(v.value!);
+          }
+        }
+      }
     }
+    categoryOptionsMap[categoryId] = {
+      for (final entry in aggregated.entries) entry.key: entry.value.toList()
+    };
   }
 
   void _onScroll() async {
@@ -283,30 +299,20 @@ class CategoryCubit extends Cubit<CategoryState> {
     }
   }
 
-  Future<void> fetchMoreProducts(int id) async {
-    final List<ConnectivityResult> connectivityResult =
-        await (Connectivity().checkConnectivity());
-    if (!connectivityResult.contains(ConnectivityResult.none)) {
+  Future<void> fetchMoreProducts(int categoryId) async {
+    final connectivity = await Connectivity().checkConnectivity();
+    if (!connectivity.contains(ConnectivityResult.none)) {
       emit(ProductAllLoadingMore());
-      final response =
-          await categoryRepo.fetchProductCategoryData(id, prePageNum);
-      response.fold((error) {
-        productSubSubCategoriesList = [];
-        emit(FetchMoreProductsFailure(error));
-      }, (productSubSubCategoriesData) {
-        productSubSubCategoriesList.addAll(productSubSubCategoriesData);
+      final res = await categoryRepo.fetchProductCategoryData(
+          categoryId, prePageNum + 1);
+      res.fold((err) {
+        emit(FetchMoreProductsFailure(err));
+      }, (list) {
+        prePageNum += 1;
+        productList.addAll(list); // ✅ append new Data
         emit(FetchMoreProductsSuccess());
       });
     } else {
-      productSubSubCategoriesList = [];
-      Fluttertoast.showToast(
-        msg: "No internet Connection",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: ColorsManager.kPrimaryColor,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
       emit(FetchMoreProductsFailure(
           ApiErrorModel(message: 'No internet connection')));
     }

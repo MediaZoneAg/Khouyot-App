@@ -55,6 +55,7 @@ class ProductAllLoadingMore extends CategoryState {}
 
 final class FetchMoreProductsSuccess extends CategoryState {
 }
+class OptionFilterChanged extends CategoryState {}
 
 final class FetchMoreProductsFailure extends CategoryState {
   final ApiErrorModel error;

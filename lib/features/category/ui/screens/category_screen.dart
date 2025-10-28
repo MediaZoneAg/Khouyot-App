@@ -26,8 +26,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
   void initState() {
     super.initState();
     CategoryCubit.get(context).fetchCategories();
-    CategoryCubit.get(context).fetchChildSubCategories(
-    CategoryCubit.get(context).categories[0].data!.first.id!, 0);
+    // CategoryCubit.get(context).fetchChildSubCategories(
+    // CategoryCubit.get(context).categories[0].data!.first.id!, 0);
     CategoryCubit.get(context).fetchProductSubSubCategories(
     CategoryCubit.get(context).categories[0].data!.first.id!,
     );
