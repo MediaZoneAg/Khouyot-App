@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "756328171123",
+    "project_id": "khoyout-fe510",
+    "storage_bucket": "khoyout-fe510.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:756328171123:android:ab69b0d6019cda57d10c06",
+        "android_client_info": {
+          "package_name": "com.example.khouyot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeg4pZoV3fBjKOCt5wof49EExB0raOb5E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:756328171123:android:a89a4bceb14600abd10c06",
+        "android_client_info": {
+          "package_name": "com.mzkhoyout.khoyout"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeg4pZoV3fBjKOCt5wof49EExB0raOb5E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
