@@ -25,6 +25,7 @@ void initState() {
     // Load categories and initial products
     context.read<CategoryCubit>().fetchCategories();
     context.read<HomeCubit>().fetchAllProducts();
+    FavCubit.get(context).getWishList();
    
   // Fetch categories first
   CategoryCubit.get(context).fetchCategories().then((value) {

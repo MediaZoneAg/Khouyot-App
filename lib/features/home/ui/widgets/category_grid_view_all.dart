@@ -68,12 +68,17 @@ class CategoryGridViewAll extends StatelessWidget {
                   final item = homeCubit.allProducts[index];
                   return CategoryItem(
                     product: item,
-                    isClicked: FavCubit.get(context).favorite.contains(item.id),
+                    isClicked: FavCubit.get(context).wishList.any((e)=>e.id==item.id),
                     onTap1: () {
                       Navigator.pushNamed(context, Routes.categoryDetails, arguments: item);
                     },
-                    onTap2: () async {
-                      await _toggleFav(context, item);
+                    onTap2: (){
+                      print(" is fave ${FavCubit.get(context).wishList.contains(item)}");
+                      final favCubit = FavCubit.get(context);
+
+                      favCubit.addToWishList(model: ProductModel(data: [item]));
+                      favCubit.getWishList();
+                      // await _toggleFav(context, item);
                     },
                   );
                 },
@@ -88,19 +93,9 @@ class CategoryGridViewAll extends StatelessWidget {
   Future<void> _toggleFav(BuildContext context, Data product) async {
     if (await CashHelper.getStringSecured(key: Keys.token) != "") {
       final favCubit = FavCubit.get(context);
-      if (favCubit.favorite.contains(product.id)) {
-        final favModel = product.variants?.first.convertToFav(
-          productName: product.name,
-          description: product.description,
-        );
-        if (favModel != null) {
-          await favCubit.removeFromWishList(model: favModel);
-          await favCubit.getWishList();
-        }
-      } else {
-        await favCubit.addToWishList(model: ProductModel(data: [product]));
-        await favCubit.getWishList();
-      }
+      favCubit.getWishList();
+       favCubit.addToWishList(model: ProductModel(data: [product]));
+
     } else {
       showSnackBar(
         context: NavigationService.navigatorKey.currentState!.context,

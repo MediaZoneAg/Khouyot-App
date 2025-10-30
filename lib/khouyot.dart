@@ -48,7 +48,7 @@ class khouyot extends StatelessWidget {
                   // theme: ThemeData.light().copyWith(
                   // textTheme: GoogleFonts.montserratTextTheme(ThemeData.light().textTheme),
                   // ),
-                  initialRoute: Routes.signInScreen,
+                  initialRoute: Routes.splashScreen,
                   onGenerateRoute: appRouter.generateRoute,
                   supportedLocales: const [
                     Locale('en'),

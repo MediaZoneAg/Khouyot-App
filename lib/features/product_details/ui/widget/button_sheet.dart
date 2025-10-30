@@ -12,11 +12,13 @@ import 'package:khouyot/features/cart/data/models/cart_item_model.dart';
 import 'package:khouyot/features/cart/logic/cart_cubit.dart';
 import 'package:khouyot/features/home/logic/home_cubit.dart';
 import 'package:khouyot/features/home/ui/widgets/incream_decream.dart';
-import 'package:khouyot/features/home/ui/widgets/select_color_item.dart';
-import 'package:khouyot/features/home/ui/widgets/select_size_item.dart';
+import 'package:khouyot/features/product_details/ui/widget/select_color_item.dart';
+import 'package:khouyot/features/product_details/ui/widget/select_size_item.dart';
 import 'package:khouyot/generated/l10n.dart';
 
-Future<void> showAddToCartBottomSheet(BuildContext cont, ProductModel model) {
+import '../../data/model/prodec_details_model.dart';
+
+Future<void> showAddToCartBottomSheet(BuildContext cont, Data model) {
   return showModalBottomSheet(
     isScrollControlled: true,
     shape: RoundedRectangleBorder(

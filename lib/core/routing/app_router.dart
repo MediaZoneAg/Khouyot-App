@@ -26,6 +26,7 @@ import 'package:khouyot/features/location/logic/location_cubit.dart';
 import 'package:khouyot/features/location/ui/screens/choose_location_options_screen.dart';
 import 'package:khouyot/features/location/ui/screens/location_manual_screen.dart';
 import 'package:khouyot/features/nav_bar/ui/navigationbar.dart';
+import 'package:khouyot/features/product_details/logic/product_details_cubit.dart';
 import 'package:khouyot/features/profile/logic/profile_cubit.dart';
 import 'package:khouyot/features/profile/ui/screens/change_password_screen.dart';
 import 'package:khouyot/features/profile/ui/screens/chat_screen.dart';
@@ -45,6 +46,7 @@ import 'package:khouyot/features/search/ui/screens/search_screen.dart';
 import 'package:khouyot/features/splash/ui/screens/logic/cubit/splash_cubit.dart';
 import 'package:khouyot/features/splash/ui/screens/splash_screen.dart';
 
+import '../../features/product_details/ui/product_details.dart';
 import 'routes.dart';
 
 class AppRouter {
@@ -116,7 +118,7 @@ class AppRouter {
             builder: (_) => MultiBlocProvider(
                   providers: [
                     BlocProvider.value(
-                      value: getIt<HomeCubit>(),
+                      value: getIt<ProductDetailsCubit>(),
                     ),
                     BlocProvider.value(
                       value: getIt<FavCubit>(),
@@ -125,8 +127,8 @@ class AppRouter {
                       value: getIt<CartCubit>(),
                     )
                   ],
-                  child: CategoryDetails(
-                      productModel: settings.arguments as ProductModel),
+                  child: ProductDetails(
+                      productModel: settings.arguments as Data),
                 ));
       case Routes.categoryItemScreen:
         return MaterialPageRoute(

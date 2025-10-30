@@ -31,6 +31,7 @@ class SignUpStateUi extends StatelessWidget {
           CashHelper.putBool(key: Keys.guestMode, value:false);
           Navigator.pop(context);
           DioFactory.setTokenIntoHeaderAfterLogin(state.signUpResponse.token!);
+
           NavBarCubit.get(context).changeIndex(0,jumping: false);
           context.pushNamedAndRemoveUntil(
             Routes.navigationBar,

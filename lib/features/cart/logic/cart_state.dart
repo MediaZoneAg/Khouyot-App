@@ -14,6 +14,9 @@ final class CartItemSelected extends CartState {}
 final class CartAllOrderLoading extends CartState {}
 
 final class CartAllOrderSuccess extends CartState {}
+final class GetCartLoading extends CartState {}
+final class GetCartFail extends CartState {}
+final class GetCartSuccess extends CartState {}
 
 final class CartAllOrderFailure extends CartState {
   final ApiErrorModel error;

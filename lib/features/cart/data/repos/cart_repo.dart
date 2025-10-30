@@ -5,6 +5,7 @@ import 'package:khouyot/core/errors/api_error_model.dart';
 import 'package:khouyot/core/errors/error_handler.dart';
 import 'package:khouyot/core/networking/api_constants.dart';
 import 'package:khouyot/features/cart/data/models/billing_model.dart';
+import 'package:khouyot/features/cart/data/models/cartt_model.dart';
 import 'package:khouyot/features/cart/data/models/order_model.dart';
 
 
@@ -12,6 +13,7 @@ import 'package:khouyot/features/cart/data/models/order_model.dart';
 class CartRepo {
   final Dio dio;
   const CartRepo(this.dio);
+
   Future<Either<ApiErrorModel, String>> placeOrder(OrderModel orderModel)  async {
     try {
       Response response = await dio.post(
@@ -20,6 +22,15 @@ class CartRepo {
       }),
       );
       return right(response.toString());
+    } catch (e) {
+      return left(ApiErrorHandler.handle(e));
+    }
+  }  Future<Either<ApiErrorModel, CartResponse>> getCart()  async {
+    try {
+      Response response = await dio.get(
+          'cart',
+      );
+      return right(CartResponse.fromJson(response.data));
     } catch (e) {
       return left(ApiErrorHandler.handle(e));
     }
@@ -113,6 +124,7 @@ class CartRepo {
       rethrow;
     }
   }
+
 }
 
 //   Future<Either<ApiErrorModel,List<OrdersHistoryModel>>> getOrder()  async {

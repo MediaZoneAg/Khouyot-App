@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:khouyot/features/cart/data/models/cartt_model.dart';
 import 'package:khouyot/khouyot.dart';
 import 'package:khouyot/core/errors/api_error_model.dart';
 import 'package:khouyot/core/functions/snak_bar.dart';
@@ -33,14 +34,23 @@ class CartCubit extends Cubit<CartState> {
   late List<LineItems> lineItems;
   double total = 0.0;
   String? paymentKey;
+  CartResponse? cartResponse;
+  Future<void> getCart()async{
+    print('cart');
+    emit(GetCartLoading());
+    var response =await cartRepo.getCart();
+    response.fold((l){emit(GetCartFail());}, (r){
+      cartResponse=r;
+      emit(GetCartSuccess());});
+  }
   void totalPrice() {
-    total = 0.0;
-    for (int i = 0; i < cartItemList.length; i++) {
-      // Ensure the price is parsed correctly from String to double
-      total += double.parse(cartItemList[i].productModel.data!.first.variants!.first.price!) *
-          cartItemList[i].quantity;
-    }
-    emit(TotalPriceState(total: total));
+    // total = 0.0;
+    // for (int i = 0; i < cartItemList.length; i++) {
+    //   // Ensure the price is parsed correctly from String to double
+    //   total += double.parse(cartItemList[i].productModel.data!.variants.first.price) *
+    //       cartItemList[i].quantity;
+    // }
+    // emit(TotalPriceState(total: total));
   }
 
   final List<CartModel> cartList = [
@@ -93,41 +103,41 @@ class CartCubit extends Cubit<CartState> {
   }
 
   void addToCart(CartItemModel product) {
-    if (cartItemList.any((element) =>
-        element.productModel.data?.first.id == product.productModel.data?.first.id &&
-        element.variantId == product.variantId)) {
-      int index = cartItemList.indexWhere((element) =>
-          element.productModel.data?.first.id == product.productModel.data?.first.id &&
-          element.variantId == product.variantId);
-      if (product.quantity > 1) {
-        cartItemList[index].quantity += product.quantity;
-      } else {
-        cartItemList[index].quantity++;
-      }
-      emit(AddToCartState());
-      showSnackBar(
-          context: NavigationService.navigatorKey.currentState!.context,
-          text: S
-              .of(NavigationService.navigatorKey.currentState!.context)
-              .SuccessfullyAddedToCart);
-      return;
-    }
-    cartItemList.add(product);
-    showSnackBar(
-        context: NavigationService.navigatorKey.currentState!.context,
-        text: S
-            .of(NavigationService.navigatorKey.currentState!.context)
-            .SuccessfullyAddedToCart);
-    emit(AddToCartState());
-    totalPrice();
+    // if (cartItemList.any((element) =>
+    //     element.productModel.data?.id == product.productModel.data?.id &&
+    //     element.variantId == product.variantId)) {
+    //   int index = cartItemList.indexWhere((element) =>
+    //       element.productModel.data?.id == product.productModel.data?.id &&
+    //       element.variantId == product.variantId);
+    //   if (product.quantity > 1) {
+    //     cartItemList[index].quantity += product.quantity;
+    //   } else {
+    //     cartItemList[index].quantity++;
+    //   }
+    //   emit(AddToCartState());
+    //   showSnackBar(
+    //       context: NavigationService.navigatorKey.currentState!.context,
+    //       text: S
+    //           .of(NavigationService.navigatorKey.currentState!.context)
+    //           .SuccessfullyAddedToCart);
+    //   return;
+    // }
+    // cartItemList.add(product);
+    // showSnackBar(
+    //     context: NavigationService.navigatorKey.currentState!.context,
+    //     text: S
+    //         .of(NavigationService.navigatorKey.currentState!.context)
+    //         .SuccessfullyAddedToCart);
+    // emit(AddToCartState());
+    // totalPrice();
   }
 
   void removeFromCart(CartItemModel product) {
-    cartItemList.removeWhere((element) =>
-        element.productModel.data?.first.id == product.productModel.data?.first.id&&
-        element.variantId == product.variantId);
-    emit(RemoveFromCartState());
-    totalPrice(); // Recalculate the total after removing
+    // cartItemList.removeWhere((element) =>
+    //     element.productModel.data?.id == product.productModel.data?.id&&
+    //     element.variantId == product.variantId);
+    // emit(RemoveFromCartState());
+    // totalPrice(); // Recalculate the total after removing
   }
 
   void changeItemCountPlus(int index) {

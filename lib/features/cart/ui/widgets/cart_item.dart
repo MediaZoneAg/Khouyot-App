@@ -35,30 +35,30 @@ class CartItem extends StatelessWidget {
               height: 130.h,
               child: Row(
                 children: [
-                  AppCachedNetworkImage(
-                    image: cartItemModel.productModel.data!.first.variants!.first.image![0],
-                    width: 125.w,
-                    height: 170.h,
-                    radius: 10,
-                  ),
+                  // AppCachedNetworkImage(
+                  //   image: cartItemModel.productModel.data!.variants!.first.image![0],
+                  //   width: 125.w,
+                  //   height: 170.h,
+                  //   radius: 10,
+                  // ),
                   horizontalSpace(20),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          cartItemModel.productModel.data!.first.name!,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyles.font18BlackMedium.copyWith(
-                            color: ColorsManager.black,
-                          ),
-                        ),
-                        Text(
-                          "${cartItemModel.productModel.data?.first.variants?.first.price} EGP",
-                          style: TextStyles.font14KprimaryRegular,
-                        ),
+                        // Text(
+                        //   cartItemModel.productModel.data!.name!,
+                        //   maxLines: 2,
+                        //   overflow: TextOverflow.ellipsis,
+                        //   style: TextStyles.font18BlackMedium.copyWith(
+                        //     color: ColorsManager.black,
+                        //   ),
+                        // ),
+                        // Text(
+                        //   "${cartItemModel.productModel.data?.variants?.first.price} EGP",
+                        //   style: TextStyles.font14KprimaryRegular,
+                        // ),
                         //const SizeColor(),
                         Row(
                           children: [

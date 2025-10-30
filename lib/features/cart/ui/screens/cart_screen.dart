@@ -19,9 +19,20 @@ import 'package:khouyot/features/cart/ui/widgets/cart_item.dart';
 import 'package:khouyot/generated/l10n.dart';
 import 'package:lottie/lottie.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
 
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    CartCubit.get(context).getCart();
+  }
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CartCubit, CartState>(

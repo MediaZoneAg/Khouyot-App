@@ -12,6 +12,8 @@ import 'package:khouyot/features/favorite/logic/cubit/fav_cubit.dart';
 import 'package:khouyot/features/home/data/repos/home_repo.dart';
 import 'package:khouyot/features/home/logic/home_cubit.dart';
 import 'package:khouyot/features/nav_bar/logic/nav_bar_cubit.dart';
+import 'package:khouyot/features/product_details/data/repo/Product_dtails_repo.dart';
+import 'package:khouyot/features/product_details/logic/product_details_cubit.dart';
 import 'package:khouyot/features/profile/data/repos/profile_repo.dart';
 import 'package:khouyot/features/profile/logic/profile_cubit.dart';
 import 'package:khouyot/features/search/data/repos/search_repo.dart';
@@ -36,6 +38,9 @@ Future<void> setupGetIt() async {
   // Register CategoryCubit with Category
   getIt.registerFactory<CategoryRepo>(() => CategoryRepo(dio));
   getIt.registerLazySingleton<CategoryCubit>(() => CategoryCubit(getIt()));
+// Register ProductDetailsCubit with ProductDetails
+  getIt.registerFactory<ProductDetailsRepo>(() => ProductDetailsRepo(dio));
+  getIt.registerLazySingleton<ProductDetailsCubit>(() => ProductDetailsCubit(getIt()));
 
   // Register ProfileCubit with ProfileRepo
   getIt.registerFactory<ProfileRepo>(() => ProfileRepo(dio));

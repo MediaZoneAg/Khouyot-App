@@ -6,7 +6,7 @@ class ApiConstants{
   static const String categories = 'categories';
   static const String chCategories = 'products/categories/';
   static const String logout = 'client/logout';
-  static const String profile = 'wp/v2/users/me';
+  static const String profile = 'profile';
   static const String deleteAccount = 'custom/v1/delete-account';
   static const String forgotPassword = 'auth/reset-password';
   static const String resendCode = 'email-otp-authenticator/v1/resend';

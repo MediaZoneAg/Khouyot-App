@@ -22,18 +22,19 @@ class UiLoadingWishList extends StatelessWidget {
         return WishListItem(
           isClicked: false,
           wishListModel:
-              DataWish(
+              Data(
                 id: 0,
                 name: "hhhhhh",
-                price: "202",
-                imageModels: [
-                  ImageModel(
-                    id: 0,
-                    src:
-                        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbzP5tsc2Hiy2r5O1Y6OMtT4iIz903c0a7iQ&s',
-                  )
+                minPrice: 202,
+
+                // : [
+                //   ImageModel(
+                //     id: 0,
+                //     src:
+                //         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbzP5tsc2Hiy2r5O1Y6OMtT4iIz903c0a7iQ&s',
+                //   )
                 
-            ],
+           // ],
           ),
           onTap1: () {},
           onTap2: () {},

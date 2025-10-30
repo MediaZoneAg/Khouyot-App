@@ -6,6 +6,8 @@ import 'package:khouyot/core/errors/error_handler.dart';
 import 'package:khouyot/core/networking/api_constants.dart';
 import 'package:khouyot/features/favorite/data/models/wish_list_model.dart';
 
+import '../../../../core/models/product_model.dart';
+
 
 class FavRepo {
   FavRepo(this.dio);
@@ -15,8 +17,8 @@ class FavRepo {
     try {
       log("➡️ [FavRepo] Sending Add To Wishlist request with productId: $productId");
       Response response = await dio.post(
-        ApiConstants.addToWishList,
-        data: {"product_id": productId},
+        "${ApiConstants.addToWishList}/$productId",
+        // data: {"product_id": productId},
       );
       log("✅ [FavRepo] AddToWishList response: ${response.data}");
       return Right(response.data["message"]);
@@ -43,31 +45,23 @@ class FavRepo {
   //     return Left(ApiErrorHandler.handle(e));
   //   }
   // }
-  Future<Either<ApiErrorModel, List<DataWish>>> getWishList() async {
-  List<DataWish> fav = [];
+  Future<Either<ApiErrorModel, List<Data>>> getWishList() async {
+  List<Data> fav = [];
   try {
     log("➡️ [FavRepo] Fetching Wishlist...");
     Response response = await dio.get(ApiConstants.getWishList);
     log("✅ [FavRepo] GetWishList response received");
 
     // Handle different response formats
-    if (response.data is Map) {
-      final Map<String, dynamic> data = response.data;
-      if (data.containsKey('data')) {
-        final List<dynamic> items = data['data'] ?? [];
-        for (var item in items) {
-          fav.add(DataWish.fromJson(item));
-        }
-      }
-    } else if (response.data is List) {
-      // If response is directly a list
-      final List<dynamic> items = response.data;
+    final Map<String, dynamic> data = response.data;
+    if (data.containsKey('data')) {
+      final List<dynamic> items = data['data'] ?? [];
       for (var item in items) {
-        fav.add(DataWish.fromJson(item));
-      }
-    }
+        fav.add(Data.fromJson(item));
+      }}
 
-    log("✅ [FavRepo] Successfully parsed ${fav.length} wishlist items");
+
+      log("✅ [FavRepo] Successfully parsed ${fav.length} wishlist items");
     return Right(fav);
   } catch (e) {
     log("❌ [FavRepo] GetWishList error: $e");
@@ -79,9 +73,9 @@ class FavRepo {
   Future<Either<ApiErrorModel, String>> removeFromWishList({required int productId}) async {
     try {
       log("➡️ [FavRepo] Removing productId: $productId from wishlist...");
-      Response response = await dio.delete(
-        ApiConstants.removeFromWishList,
-        data: {"product_id": productId},
+      Response response = await dio.post(
+        "${ApiConstants.addToWishList}/$productId",
+
       );
       log("✅ [FavRepo] RemoveFromWishList response: ${response.data}");
       return Right(response.data["message"]);

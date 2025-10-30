@@ -5,14 +5,14 @@ class ProfileModel {
   final int? id;
   final String name;
   final String email;
-  final String url;
-  final String? description;
+
+
   ProfileModel({
     this.id,
     required this.name,
     required this.email,
-    required this.url,
-    this.description,
+
+
   });
 
   ProfileModel copyWith({
@@ -26,8 +26,7 @@ class ProfileModel {
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
-      url: url ?? this.url,
-      description: description ?? this.description,
+
     );
   }
 
@@ -36,8 +35,7 @@ class ProfileModel {
       'id': id,
       'name': name,
       'email': email,
-      'url': url,
-      'description': description,
+
     };
   }
 
@@ -46,8 +44,8 @@ class ProfileModel {
       id: map['id'] != null ? map['id'] as int : null,
       name: map['name'] as String,
       email: map['email'] as String,
-      url: map['url'] as String,
-      description: map['description'] != null ? map['description'] as String : null,
+
+     // description: map['description'] != null ? map['description'] as String : null,
     );
   }
 
@@ -57,7 +55,7 @@ class ProfileModel {
 
   @override
   String toString() {
-    return 'ProfileModel(id: $id, name: $name, email: $email, url: $url, description: $description)';
+    return 'ProfileModel(id: $id, name: $name, email: $email, )';
   }
 
   @override
@@ -67,17 +65,14 @@ class ProfileModel {
     return 
       other.id == id &&
       other.name == name &&
-      other.email == email &&
-      other.url == url &&
-      other.description == description;
+      other.email == email;
+
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
       name.hashCode ^
-      email.hashCode ^
-      url.hashCode ^
-      description.hashCode;
+      email.hashCode ;
   }
 }

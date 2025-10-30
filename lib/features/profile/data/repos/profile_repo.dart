@@ -21,7 +21,7 @@ class ProfileRepo {
         ApiConstants.profile,
       );
       return Right(ProfileModel.fromMap(
-          response.data)); // Assuming the response has the profile data
+          response.data['user'])); // Assuming the response has the profile data
     } catch (e) {
       log(e.toString());
       return Left(ApiErrorHandler.handle(e));

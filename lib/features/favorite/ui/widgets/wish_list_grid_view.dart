@@ -42,13 +42,13 @@ class WishListGridView extends StatelessWidget {
                         Routes.categoryDetails,
                         arguments: FavCubit.get(context)
                             .wishList[index]
-                            .toProductModel(),
+                            ,
                       );
                     },
 
                     onTap2: () {
-                      FavCubit.get(context).removeFromWishList(
-                          model: FavCubit.get(context).wishList[index]);
+                      // FavCubit.get(context).removeFromWishList(
+                      //     model: FavCubit.get(context).wishList[index]);
                     }, // Implement your onTap logic here
                   ));
         } else {

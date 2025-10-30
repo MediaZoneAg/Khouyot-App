@@ -19,7 +19,7 @@ import 'package:khouyot/features/cart/ui/widgets/cart_details.dart';
 import 'package:khouyot/features/cart/ui/widgets/payment_option_tile.dart';
 import 'package:khouyot/features/cart/ui/widgets/paymob_states.dart';
 import 'package:khouyot/features/cart/ui/widgets/request_state_ui.dart';
-import 'package:khouyot/features/home/ui/widgets/add_to_cart_button.dart';
+import 'package:khouyot/features/product_details/ui/widget/add_to_cart_button.dart';
 import 'package:khouyot/features/location/ui/widgets/location_container.dart';
 import 'package:khouyot/generated/l10n.dart';
 
@@ -40,36 +40,36 @@ class CheckOutScreen extends StatelessWidget {
                 text: S.of(context).PlaceOrder,
                 price: CartCubit.get(context).total,
                 onTap: () {
-                  for (var element in CartCubit.get(context).cartItemList) {
-                    CartCubit.get(context).lineItems = [
-                      LineItems(
-                          quantity: element.quantity,
-                          productId: element.productModel.data?.first.id!.toInt(),
-                          variationId: 0)
-                    ];
-                  }
-                  CartCubit.get(context).orderModel = OrderModel(
-                      shippingLines: [
-                        ShippingLines(
-                            methodId: 'flat_rate',
-                            methodTitle: 'flat_rate',
-                            total: '10')
-                      ],
-                      lineItems: CartCubit.get(context).lineItems,
-                      paymentMethod:
-                          CartCubit.get(context).selectedPaymentMethod ??
-                              S.of(context).cash,
-                      paymentMethodTitle:
-                          CartCubit.get(context).selectedPaymentMethod ??
-                              S.of(context).card,
-                      billing: CartCubit.get(context).billing,
-                      shipping: CartCubit.get(context).shipping,
-                      setPaid: false);
-                      if(CartCubit.get(context).selectedPaymentMethod==S.of(context).cash){
-                        CartCubit.get(context).placeOrder();
-                      }else{
-                        CartCubit.get(context).pay(CartCubit.get(context).total, CartCubit.get(context).billing);
-                      }
+                  // for (var element in CartCubit.get(context).cartItemList) {
+                  //   CartCubit.get(context).lineItems = [
+                  //     LineItems(
+                  //         quantity: element.quantity,
+                  //         productId: element.productModel.data?.id.toInt(),
+                  //         variationId: 0)
+                  //   ];
+                  // }
+                  // CartCubit.get(context).orderModel = OrderModel(
+                  //     shippingLines: [
+                  //       ShippingLines(
+                  //           methodId: 'flat_rate',
+                  //           methodTitle: 'flat_rate',
+                  //           total: '10')
+                  //     ],
+                  //     lineItems: CartCubit.get(context).lineItems,
+                  //     paymentMethod:
+                  //         CartCubit.get(context).selectedPaymentMethod ??
+                  //             S.of(context).cash,
+                  //     paymentMethodTitle:
+                  //         CartCubit.get(context).selectedPaymentMethod ??
+                  //             S.of(context).card,
+                  //     billing: CartCubit.get(context).billing,
+                  //     shipping: CartCubit.get(context).shipping,
+                  //     setPaid: false);
+                  //     if(CartCubit.get(context).selectedPaymentMethod==S.of(context).cash){
+                  //       CartCubit.get(context).placeOrder();
+                  //     }else{
+                  //       CartCubit.get(context).pay(CartCubit.get(context).total, CartCubit.get(context).billing);
+                  //     }
                  // CartCubit.get(context).placeOrder();
                 },
               );

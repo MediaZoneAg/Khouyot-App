@@ -8,6 +8,8 @@ import 'package:khouyot/core/theming/styles.dart';
 import 'package:khouyot/core/widgets/image_network.dart';
 import 'package:khouyot/features/favorite/data/models/wish_list_model.dart';
 
+import '../../../../core/models/product_model.dart';
+
 class WishListItem extends StatelessWidget {
   const WishListItem(
       {super.key,
@@ -16,7 +18,7 @@ class WishListItem extends StatelessWidget {
       required this.onTap2,
       required this.isClicked});
   final VoidCallback onTap1;
-  final DataWish wishListModel;
+  final Data wishListModel;
   final VoidCallback onTap2;
   final bool isClicked;
   @override
@@ -35,7 +37,7 @@ class WishListItem extends StatelessWidget {
                   children: [
                     //if(productModel.images!.isNotEmpty)
                     AppCachedNetworkImage(
-                      image: wishListModel.images![0],
+                      image: wishListModel.primaryImage,
                       width: 165.w,
                       height: 165.h,
                       radius: 10.r,
@@ -53,7 +55,7 @@ class WishListItem extends StatelessWidget {
                     ),
                     verticalSpace(7),
                     Text(
-                      "EGP ${wishListModel.price ?? "25 EGP"}",
+                      "EGP ${wishListModel.minPrice ?? "25 EGP"}",
                       style: TextStyles.font16KprimaryRegular,
                     ),
                   ],
