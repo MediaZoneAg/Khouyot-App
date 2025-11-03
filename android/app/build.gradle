@@ -36,11 +36,11 @@ android {
 
     signingConfigs {
     release {
-        val ksPath = System.getenv("ANDROID_KEYSTORE_PATH")
-        storeFile = if (!ksPath.isNullOrBlank()) File(ksPath) else file("app/release-keystore.jks")
-        storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: ""
-        keyAlias      = System.getenv("ANDROID_KEY_ALIAS") ?: ""
-        keyPassword   = System.getenv("ANDROID_KEY_PASSWORD") ?: ""
+        keyAlias      System.getenv("ANDROID_KEY_ALIAS")
+        keyPassword   System.getenv("ANDROID_KEY_PASSWORD")
+        def ksPath = System.getenv("ANDROID_KEYSTORE_PATH")
+                if (ksPath) storeFile = file(ksPath)
+        storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
     }
 }
 
