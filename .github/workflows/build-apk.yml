@@ -3,11 +3,6 @@ name: Build APK & AAB (Flutter)
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
-
-concurrency:
-  group: build-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build-android:
@@ -15,7 +10,6 @@ jobs:
 
     steps:
       - name: Checkout
-      # v4 caches git metadata efficiently
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
@@ -28,64 +22,30 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      # Cache SDK components we install (platforms/build-tools/ndk/cmake)
-      - name: Cache Android SDK components
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ env.ANDROID_SDK_ROOT }}/platforms
-            ${{ env.ANDROID_SDK_ROOT }}/build-tools
-            ${{ env.ANDROID_SDK_ROOT }}/ndk
-            ${{ env.ANDROID_SDK_ROOT }}/cmake
-          key: sdk-${{ runner.os }}-${{ hashFiles('android/app/build.gradle*', 'android/build.gradle*') }}
-
-      - name: Install Android platforms/build-tools/NDK/CMake
+      - name: Install Android platforms/build-tools
         shell: bash
         run: |
-          # read compileSdk from gradle, fallback 36
           CSK=$(grep -Po 'compileSdk\s*=\s*\K[0-9]+' android/app/build.gradle.kts \
                || grep -Po 'compileSdk\s*[=:]\s*\K[0-9]+' android/app/build.gradle \
                || echo 36)
           echo "Detected compileSdk=$CSK"
           yes | sdkmanager --licenses >/dev/null 2>&1 || true
           sdkmanager "platform-tools" || true
-          sdkmanager "platforms;android-${CSK}" || sdkmanager "platforms;android-36"
-          sdkmanager "build-tools;${CSK}.0.0" || sdkmanager "build-tools;36.0.0"
-          sdkmanager "ndk;27.0.12077973"
-          sdkmanager "cmake;3.22.1"
+          sdkmanager "platforms;android-${CSK}" || sdkmanager "platforms;android-35" || sdkmanager "platforms;android-34"
+          sdkmanager "build-tools;${CSK}.0.0" || sdkmanager "build-tools;35.0.0" || sdkmanager "build-tools;34.0.0"
 
-      - name: Set up Flutter (stable)
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: '3.35.7'   # keep your pinned version
+          flutter-version: '3.35.7'
           cache: true
 
-      - name: Cache pub
-        uses: actions/cache@v4
-        with:
-          path: ~/.pub-cache
-          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: pub-${{ runner.os }}-
-
-      - name: Gradle/Flutter CI tuning (enable cache/daemon/parallel)
-        shell: bash
-        run: |
-          mkdir -p ~/.gradle
-          cat > ~/.gradle/gradle.properties <<'EOF'
-          org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8 -XX:+UseParallelGC -XX:MaxMetaspaceSize=1g
-          org.gradle.daemon=true
-          org.gradle.parallel=true
-          org.gradle.caching=true
-          android.enableR8=true
-          EOF
-        env:
-          CI: true
 
       - name: Flutter pub get
         run: flutter pub get
 
-      # Optional: restore google-services.json if stored as Base64 secret
+      # Optional: restore google-services.json if you store it as Base64 secret
       # - name: Restore google-services.json
       #   run: echo "${{ secrets.ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 -d > android/app/google-services.json
 
@@ -93,16 +53,27 @@ jobs:
         shell: bash
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/release-keystore.jks
-          {
-            echo "ANDROID_KEYSTORE_PATH=$PWD/android/app/release-keystore.jks"
-            echo "ANDROID_KEYSTORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}"
-            echo "ANDROID_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}"
-            echo "ANDROID_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}"
-          } >> $GITHUB_ENV
+          echo "ANDROID_KEYSTORE_PATH=$PWD/android/app/release-keystore.jks" >> $GITHUB_ENV
+          echo "ANDROID_KEYSTORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+          echo "ANDROID_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}"       >> $GITHUB_ENV
+          echo "ANDROID_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> $GITHUB_ENV
 
-      # ------------------ Build AAB (single heavy build) ------------------
+      # ------------------ Build APK ------------------
+      - name: Build APK (release)
+        run: flutter build apk --release --split-per-abi
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-release
+          path: |
+            build/app/outputs/flutter-apk/*-release.apk
+            android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: warn
+
+      # ------------------ Build AAB ------------------
       - name: Build AAB (release)
-        run: flutter build appbundle --release --build-number $GITHUB_RUN_NUMBER --android-skip-build-dependency-validation
+        run: flutter build appbundle --release --build-number $GITHUB_RUN_NUMBER
 
       - name: Upload AAB
         uses: actions/upload-artifact@v4
@@ -113,32 +84,8 @@ jobs:
             android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
 
-      # -------- Generate APK from the AAB (no recompile) --------
-      - name: Download bundletool
-        run: |
-          curl -L -o bundletool.jar https://github.com/google/bundletool/releases/download/1.17.2/bundletool-all-1.17.2.jar
-
-      # Universal APK works on all devices; fastest path
-      - name: Build universal APK from AAB
-        run: |
-          java -jar bundletool.jar build-apks \
-            --bundle=build/app/outputs/bundle/release/app-release.aab \
-            --output=universal.apks \
-            --mode=universal
-          unzip -p universal.apks universal.apk > app-universal-release.apk
-
-      - name: Upload APK (universal from AAB)
-        uses: actions/upload-artifact@v4
-        with:
-          name: apk-release
-          path: app-universal-release.apk
-          if-no-files-found: error
-
-      # If you prefer per-ABI APKs instead of universal, replace the two steps above with:
-      # java -jar bundletool.jar build-apks --bundle=... --output=splits.apks --mode=default
-      # unzip splits.apks -d split-apks && upload split-apks/*.apk
-
-      - name: Upload mapping.txt (if minified)
+      # (Optional) upload mapping.txt generated by proguard for crash mapping
+      - name: Upload mapping.txt
         uses: actions/upload-artifact@v4
         with:
           name: mapping-txt
